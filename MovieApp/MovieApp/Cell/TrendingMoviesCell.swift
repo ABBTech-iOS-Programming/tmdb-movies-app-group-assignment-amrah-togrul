@@ -39,18 +39,17 @@ class TrendingMoviesCell: UICollectionViewCell {
     
     //MARK: Private methods
     private func setupUI() {
-        contentView.backgroundColor = .systemBackground
         contentView.layer.cornerRadius = 16
         
         setupSubview()
         setupConstraints()
     }
 
-    private func setupConstraints() {
+    private func setupSubview() {
         contentView.addSubview(posterImageView)
     }
 
-    private func setupSubview() {
+    private func setupConstraints() {
         posterImageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }

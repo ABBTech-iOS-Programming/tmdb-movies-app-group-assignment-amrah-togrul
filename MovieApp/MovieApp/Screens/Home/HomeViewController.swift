@@ -20,14 +20,16 @@ final class HomeViewController: UIViewController {
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.text = "What do you want to watch?"
-        label.font = .systemFont(ofSize: 20)
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .white
         return label
     }()
     
     private let trentingMoviesLabel: UILabel = {
         let label = UILabel()
         label.text = "Trending"
-        label.font = .systemFont(ofSize: 20)
+        label.font = .systemFont(ofSize: 20, weight: .semibold)
+        label.textColor = .white
         return label
     }()
     
@@ -40,13 +42,15 @@ final class HomeViewController: UIViewController {
         layout.minimumInteritemSpacing = spacing
         layout.minimumLineSpacing = spacing
         layout.sectionInset = UIEdgeInsets(top: spacing, left: 11, bottom: 11, right: spacing)
-        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        layout.itemSize = CGSize(width: 144, height: 210)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.tag = 0
+        collectionView.showsHorizontalScrollIndicator = false
         collectionView.register(TrendingMoviesCell.self, forCellWithReuseIdentifier: TrendingMoviesCell.reusableCell)
+        collectionView.backgroundColor = .primary
         return collectionView
     }()
         
@@ -96,6 +100,7 @@ final class HomeViewController: UIViewController {
         trendingMoviesList.snp.makeConstraints { make in
             make.top.equalTo(trentingMoviesLabel.snp.bottom).offset(24)
             make.horizontalEdges.equalToSuperview()
+            make.height.equalTo(230)
         }
     }
 

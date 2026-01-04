@@ -18,18 +18,19 @@ final class HomeViewModel {
     }
     
     func fetchTrendingMovies() {
-        networkService.request(MovieEndpoint.getTrendingMovies) { [weak self] (result: Result<[Movie], NetworkError>) in
-            
-            guard let self else  { return }
-            
+        networkService.request(MovieEndpoint.getTrendingMovies) {
+            [weak self] (result: Result<MoviesResponse, NetworkError>) in
+
+            guard let self else { return }
+
             switch result {
-            case .success(let movies):
-                self.trendingMovies = movies
+            case .success(let response):
+                self.trendingMovies = response.results
                 DispatchQueue.main.async {
                     self.onTrendingMoviesUpdated()
                 }
             case .failure(let error):
-                print("Log Error: \(error)")
+                print("❌ Trending error:", error)
             }
         }
     }
