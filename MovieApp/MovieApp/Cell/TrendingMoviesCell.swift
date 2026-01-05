@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 class TrendingMoviesCell: UICollectionViewCell {
-    static let reusableCell = String(describing: TrendingMoviesCell.self)
+    static let reuseIdentifier = String(describing: TrendingMoviesCell.self)
     
     private let posterImageView: UIImageView = {
         let imageView = UIImageView()
@@ -56,6 +56,7 @@ class TrendingMoviesCell: UICollectionViewCell {
     }
     
     override func prepareForReuse() {
+        super.prepareForReuse()
         posterImageView.image = nil
     }
 }

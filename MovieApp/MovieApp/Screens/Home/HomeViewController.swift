@@ -15,8 +15,12 @@ final class HomeViewController: UIViewController {
     //MARK: Views
     
     //TODO: Add search field
-    //TODO: Add categories filter
-    //TODO: Add films list by selected category
+    //TODO: Setup scroll view
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        return scrollView
+    }()
+    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.text = "What do you want to watch?"
@@ -31,6 +35,27 @@ final class HomeViewController: UIViewController {
         label.font = .systemFont(ofSize: 20, weight: .semibold)
         label.textColor = .white
         return label
+    }()
+    
+    private lazy var categoriesView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        
+        let spacing: CGFloat = 8.0
+        let itemSize = CGSize(width: 100, height: 40)
+        layout.minimumInteritemSpacing = spacing
+        layout.minimumLineSpacing = spacing
+        layout.sectionInset = UIEdgeInsets(top: spacing, left: spacing * 2, bottom: spacing, right: spacing * 2)
+        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.tag = 1
+        collectionView.backgroundColor = .primary
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.register(CategoiresCollectionViewCell.self, forCellWithReuseIdentifier: CategoiresCollectionViewCell.reuseIdentifier)
+        return collectionView
     }()
     
     private lazy var trendingMoviesList: UICollectionView = {
@@ -49,7 +74,34 @@ final class HomeViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.tag = 0
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.register(TrendingMoviesCell.self, forCellWithReuseIdentifier: TrendingMoviesCell.reusableCell)
+        collectionView.register(TrendingMoviesCell.self, forCellWithReuseIdentifier: TrendingMoviesCell.reuseIdentifier)
+        collectionView.backgroundColor = .primary
+        return collectionView
+    }()
+    
+    private lazy var selectedGenreMoviesList: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        
+        let spacing: CGFloat = 16.0
+        let horizontalInset: CGFloat = 22.0
+        let numberOfColumns: CGFloat = 3
+        let totalSpacing = (numberOfColumns - 1) * spacing + (horizontalInset * 2)
+        let itemWidth = (UIScreen.main.bounds.width - totalSpacing) / numberOfColumns
+        let itemHeight: CGFloat = itemWidth * 1.5
+        
+        layout.minimumInteritemSpacing = spacing
+        layout.minimumLineSpacing = spacing
+        layout.sectionInset = UIEdgeInsets(top: 0, left: horizontalInset, bottom: 20, right: horizontalInset)
+        layout.itemSize = CGSize(width: itemWidth, height: itemHeight)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.tag = 2
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.register(TrendingMoviesCell.self, forCellWithReuseIdentifier: TrendingMoviesCell.reuseIdentifier)
         collectionView.backgroundColor = .primary
         return collectionView
     }()
@@ -58,7 +110,7 @@ final class HomeViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
-        viewModel.fetchTrendingMovies()
+        loadInitialData()
     }
     
     init(viewModel: HomeViewModel) {
@@ -79,10 +131,23 @@ final class HomeViewController: UIViewController {
     
     private func bindViewModel() {
         viewModel.onTrendingMoviesUpdated = { [weak self] in
-            guard let self else { return }
-            trendingMoviesList.reloadData()
-            
+            self?.trendingMoviesList.reloadData()
         }
+        
+        viewModel.onCategoryMoviesUpdated = { [weak self] in
+            self?.selectedGenreMoviesList.reloadData()
+        }
+        
+        viewModel.onError = { errorMessage in
+            print("Error: \(errorMessage)")
+            // TODO: Show error to user
+        }
+    }
+    
+    private func loadInitialData() {
+        viewModel.fetchTrendingMovies()
+        viewModel.fetchMovies(.nowPlaying)
+        categoriesView.selectItem(at: IndexPath(item: 0, section: 0), animated: false, scrollPosition: [])
     }
 
     private func setupConstraints() {
@@ -94,7 +159,6 @@ final class HomeViewController: UIViewController {
         trentingMoviesLabel.snp.makeConstraints { make in
             make.top.equalTo(headerLabel.snp.bottom).offset(24)
             make.horizontalEdges.equalToSuperview().inset(22)
-
         }
         
         trendingMoviesList.snp.makeConstraints { make in
@@ -102,24 +166,67 @@ final class HomeViewController: UIViewController {
             make.horizontalEdges.equalToSuperview()
             make.height.equalTo(230)
         }
+        
+        categoriesView.snp.makeConstraints { make in
+            make.top.equalTo(trendingMoviesList.snp.bottom).offset(24)
+            make.horizontalEdges.equalToSuperview()
+            make.height.equalTo(50)
+        }
+        
+        selectedGenreMoviesList.snp.makeConstraints { make in
+            make.top.equalTo(categoriesView.snp.bottom).offset(24)
+            make.horizontalEdges.equalToSuperview()
+            make.bottom.equalTo(view)
+        }
     }
 
     private func setupSubview() {
-        [headerLabel, trentingMoviesLabel, trendingMoviesList].forEach(view.addSubview)
+        [headerLabel, trentingMoviesLabel, trendingMoviesList, categoriesView, selectedGenreMoviesList].forEach(view.addSubview)
     }
 }
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView.tag == 1 {
+            let selectedCategory = viewModel.filterCategories[indexPath.row]
+            viewModel.fetchMovies(selectedCategory)
+        }
+    }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.trendingMovies.count
+        switch collectionView.tag {
+        case 0: // Trending movies
+            return viewModel.trendingMovies.count
+        case 1: // Categories
+            return viewModel.filterCategories.count
+        case 2: // Category movies
+            return viewModel.categoryMovies.count
+        default:
+            return 0
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrendingMoviesCell.reusableCell, for: indexPath) as? TrendingMoviesCell
-        guard let cell else {
-            return TrendingMoviesCell()
+        if collectionView.tag == 0 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrendingMoviesCell.reuseIdentifier, for: indexPath) as? TrendingMoviesCell
+            guard let cell else {
+                return TrendingMoviesCell()
+            }
+            cell.config(with: viewModel.trendingMovies[indexPath.row])
+            return cell
+        } else if  collectionView.tag == 1 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoiresCollectionViewCell.reuseIdentifier, for: indexPath) as? CategoiresCollectionViewCell
+            guard let cell else {
+                return CategoiresCollectionViewCell()
+            }
+            cell.config(with: viewModel.filterCategories[indexPath.row])
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrendingMoviesCell.reuseIdentifier, for: indexPath) as? TrendingMoviesCell
+            guard let cell else {
+                return TrendingMoviesCell()
+            }
+            cell.config(with: viewModel.categoryMovies[indexPath.row])
+            return cell
         }
-        cell.config(with: viewModel.trendingMovies[indexPath.row])
-        return cell
     }
 }
