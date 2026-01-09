@@ -13,7 +13,6 @@ final class HomeViewController: UIViewController {
     
     //MARK: Views
     
-    //TODO: Add search field
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
@@ -33,6 +32,33 @@ final class HomeViewController: UIViewController {
         return label
     }()
     
+    //Search bar as a Button
+    private lazy var searchBarAsButton: UIView = {
+        let view = UIView()
+        view.backgroundColor = .secondary
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(navigateToSearchMovieScreen)))
+        view.layer.cornerRadius = 16
+        return view
+    }()
+    
+    private let searchLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Search"
+        label.font = .app(.poppinsRegular(size: 14))
+        label.textColor = .tertiary
+        return label
+    }()
+    
+    private let searchIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "magnifyingglass")
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.tintColor = .tertiary
+        return imageView
+    }()
+    
+    //Trending movies
     private let trendingMoviesLabel: UILabel = {
         let label = UILabel()
         label.text = "Trending"
@@ -81,6 +107,7 @@ final class HomeViewController: UIViewController {
         return collectionView
     }()
     
+    //Category & Its list
     private lazy var selectedGenreMoviesList: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -101,7 +128,7 @@ final class HomeViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.tag = 2
-        collectionView.isScrollEnabled = false // Important: Disable scrolling
+        collectionView.isScrollEnabled = false
         collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.register(TrendingMoviesCell.self, forCellWithReuseIdentifier: TrendingMoviesCell.reuseIdentifier)
@@ -204,8 +231,25 @@ final class HomeViewController: UIViewController {
             make.horizontalEdges.equalToSuperview().inset(22)
         }
         
-        trendingMoviesLabel.snp.makeConstraints { make in
+        searchLabel.snp.makeConstraints { make in
+            make.verticalEdges.equalTo(searchBarAsButton)
+            make.leading.equalTo(24)
+        }
+        
+        searchIcon.snp.makeConstraints { make in
+            make.verticalEdges.equalTo(searchBarAsButton)
+            make.width.height.equalTo(16)
+            make.trailing.equalTo(-24)
+        }
+        
+        searchBarAsButton.snp.makeConstraints { make in
             make.top.equalTo(headerLabel.snp.bottom).offset(24)
+            make.height.equalTo(42)
+            make.horizontalEdges.equalToSuperview().inset(22)
+        }
+        
+        trendingMoviesLabel.snp.makeConstraints { make in
+            make.top.equalTo(searchBarAsButton.snp.bottom).offset(24)
             make.horizontalEdges.equalToSuperview().inset(22)
         }
         
@@ -217,7 +261,8 @@ final class HomeViewController: UIViewController {
         
         categoriesView.snp.makeConstraints { make in
             make.top.equalTo(trendingMoviesList.snp.bottom).offset(24)
-            make.horizontalEdges.equalToSuperview().inset(22)
+            make.leading.equalTo(24)
+            make.trailing.equalToSuperview()
             make.height.equalTo(56)
         }
         
@@ -232,7 +277,18 @@ final class HomeViewController: UIViewController {
     private func setupSubview() {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        [headerLabel, trendingMoviesLabel, trendingMoviesList, categoriesView, selectedGenreMoviesList].forEach(contentView.addSubview)
+        [searchLabel, searchIcon].forEach(searchBarAsButton.addSubview)
+        [headerLabel, searchBarAsButton, trendingMoviesLabel, trendingMoviesList, categoriesView, selectedGenreMoviesList].forEach(contentView.addSubview)
+    }
+    
+    @objc private func navigateToSearchMovieScreen() {
+        let vc = SearchViewBuilder().build()
+        tabBarController?.selectedIndex = 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if let searchVC = vc as? SearchViewController {
+                searchVC.focusSearchBar()
+            }
+        }
     }
 }
 

@@ -19,7 +19,7 @@ extension SearchMovieEndpoint: Endpoint {
     var path: String {
         switch self {
         case .searchMovie:
-            return "/search-movie"
+            return "/search/movie"
         }
     }
     
@@ -33,7 +33,7 @@ extension SearchMovieEndpoint: Endpoint {
             return [
                 URLQueryItem(name: "query", value: query),
                 URLQueryItem(name: "page", value: "\(page)"),
-                URLQueryItem(name: "include_adult", value: "false")
+                URLQueryItem(name: "include_adult", value: "false"),
             ]
         }
     }

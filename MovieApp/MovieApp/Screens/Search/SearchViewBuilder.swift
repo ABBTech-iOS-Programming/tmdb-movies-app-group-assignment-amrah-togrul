@@ -8,7 +8,8 @@
 
 final class SearchViewBuilder {
     func build() -> SearchViewController {
-        let vm = SearchViewModel()
+        let networkService: NetworkService = DefaultNetworkService()
+        let vm = SearchViewModel(networkService: networkService)
         let vc = SearchViewController(viewModel: vm)
         return vc
     }

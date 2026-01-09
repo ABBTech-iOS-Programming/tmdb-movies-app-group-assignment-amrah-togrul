@@ -22,6 +22,7 @@ final class HomeViewModel {
     init(networkService: NetworkService) {
         self.networkService = networkService
     }
+    
     func fetchMovies(_ category: MovieCategory) {
         networkService.request(category.endpoint) {
             [weak self] (result: Result<MoviesResponse, NetworkError>) in
