@@ -24,6 +24,8 @@ final class HomeViewController: UIViewController {
         return view
     }()
     
+    
+    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.text = "What do you want to watch?"
@@ -293,56 +295,74 @@ final class HomeViewController: UIViewController {
 }
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard collectionView.tag == 1 else { return }
-        
-        let selectedCategory = viewModel.filterCategories[indexPath.row]
-        viewModel.fetchMovies(selectedCategory)
+
+        switch collectionView.tag {
+
+        case 0:
+            let movieId = viewModel.trendingMovies[indexPath.item].id
+            let vc = MovieDetailViewController(movieId: movieId)
+            navigationController?.pushViewController(vc, animated: true)
+
+        case 1:
+            let selectedCategory = viewModel.filterCategories[indexPath.item]
+            viewModel.fetchMovies(selectedCategory)
+
+        case 2:
+            let movieId = viewModel.categoryMovies[indexPath.item].id
+            let vc = MovieDetailViewController(movieId: movieId)
+            navigationController?.pushViewController(vc, animated: true)
+
+        default:
+            break
+        }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView.tag {
-        case 0: // Trending movies
+        case 0:
             return viewModel.trendingMovies.count
-        case 1: // Categories
+        case 1:
             return viewModel.filterCategories.count
-        case 2: // Category movies
+        case 2:
             return viewModel.categoryMovies.count
         default:
             return 0
         }
     }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+
         switch collectionView.tag {
-        case 0: // Trending movies
-            guard let cell = collectionView.dequeueReusableCell(
+
+        case 0:
+            let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrendingMoviesCell.reuseIdentifier,
                 for: indexPath
-            ) as? TrendingMoviesCell else {
-                return UICollectionViewCell()
-            }
-            cell.config(with: viewModel.trendingMovies[indexPath.row])
+            ) as! TrendingMoviesCell
+            cell.config(with: viewModel.trendingMovies[indexPath.item])
             return cell
-        case 1: // Categories
-            guard let cell = collectionView.dequeueReusableCell(
+
+        case 1:
+            let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: CategoiresCollectionViewCell.reuseIdentifier,
                 for: indexPath
-            ) as? CategoiresCollectionViewCell else {
-                return UICollectionViewCell()
-            }
-            cell.config(with: viewModel.filterCategories[indexPath.row])
+            ) as! CategoiresCollectionViewCell
+            cell.config(with: viewModel.filterCategories[indexPath.item])
             return cell
-        case 2: // Category movies
-            guard let cell = collectionView.dequeueReusableCell(
+
+        case 2:
+            let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrendingMoviesCell.reuseIdentifier,
                 for: indexPath
-            ) as? TrendingMoviesCell else {
-                return UICollectionViewCell()
-            }
-            cell.config(with: viewModel.categoryMovies[indexPath.row])
+            ) as! TrendingMoviesCell
+            cell.config(with: viewModel.categoryMovies[indexPath.item])
             return cell
-            
+
         default:
             return UICollectionViewCell()
         }
