@@ -67,9 +67,7 @@ final class WatchListViewController: UIViewController {
         }
     }
     
-    func config() {
-        
-    }
+   
     
     private func setupUI() {
         view.backgroundColor = .primary
