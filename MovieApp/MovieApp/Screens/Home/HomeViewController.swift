@@ -24,8 +24,6 @@ final class HomeViewController: UIViewController {
         return view
     }()
     
-    
-    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.text = "What do you want to watch?"
@@ -295,74 +293,70 @@ final class HomeViewController: UIViewController {
 }
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-
         switch collectionView.tag {
-
-        case 0:
+        case 0: // Trending movies
             let movieId = viewModel.trendingMovies[indexPath.item].id
             let vc = MovieDetailViewController(movieId: movieId)
             navigationController?.pushViewController(vc, animated: true)
-
-        case 1:
+            
+        case 1: // Categories
             let selectedCategory = viewModel.filterCategories[indexPath.item]
             viewModel.fetchMovies(selectedCategory)
-
-        case 2:
+            
+        case 2: // Category movies
             let movieId = viewModel.categoryMovies[indexPath.item].id
             let vc = MovieDetailViewController(movieId: movieId)
             navigationController?.pushViewController(vc, animated: true)
-
+            
         default:
             break
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView.tag {
-        case 0:
+        case 0: // Trending movies
             return viewModel.trendingMovies.count
-        case 1:
+        case 1: // Categories
             return viewModel.filterCategories.count
-        case 2:
+        case 2: // Category movies
             return viewModel.categoryMovies.count
         default:
             return 0
         }
     }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        cellForItemAt indexPath: IndexPath
-    ) -> UICollectionViewCell {
-
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         switch collectionView.tag {
-
-        case 0:
-            let cell = collectionView.dequeueReusableCell(
+        case 0: // Trending movies
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrendingMoviesCell.reuseIdentifier,
                 for: indexPath
-            ) as! TrendingMoviesCell
-            cell.config(with: viewModel.trendingMovies[indexPath.item])
+            ) as? TrendingMoviesCell else {
+                return UICollectionViewCell()
+            }
+            cell.config(with: viewModel.trendingMovies[indexPath.row])
             return cell
-
-        case 1:
-            let cell = collectionView.dequeueReusableCell(
+        case 1: // Categories
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: CategoiresCollectionViewCell.reuseIdentifier,
                 for: indexPath
-            ) as! CategoiresCollectionViewCell
-            cell.config(with: viewModel.filterCategories[indexPath.item])
+            ) as? CategoiresCollectionViewCell else {
+                return UICollectionViewCell()
+            }
+            cell.config(with: viewModel.filterCategories[indexPath.row])
             return cell
-
-        case 2:
-            let cell = collectionView.dequeueReusableCell(
+        case 2: // Category movies
+            guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrendingMoviesCell.reuseIdentifier,
                 for: indexPath
-            ) as! TrendingMoviesCell
-            cell.config(with: viewModel.categoryMovies[indexPath.item])
+            ) as? TrendingMoviesCell else {
+                return UICollectionViewCell()
+            }
+            cell.config(with: viewModel.categoryMovies[indexPath.row])
             return cell
-
+            
         default:
             return UICollectionViewCell()
         }

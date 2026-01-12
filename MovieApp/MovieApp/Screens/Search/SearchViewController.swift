@@ -227,10 +227,10 @@ extension SearchViewController: UICollectionViewDataSource {
 }
 
 extension SearchViewController: UICollectionViewDelegate {
-    //TODO: Add click action to details screen
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let movie = viewModel.searchedMovies[indexPath.row]
-        print("Selected movie: \(movie.title)")
+        let movieId = viewModel.searchedMovies[indexPath.item].id
+        let vc = MovieDetailViewController(movieId: movieId)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
