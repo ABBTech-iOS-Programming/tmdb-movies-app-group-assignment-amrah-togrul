@@ -25,7 +25,12 @@ extension SearchMovieEndpoint: Endpoint {
     
     var method: HTTPMethod { .get }
 
-    var headers: [String: String]? { nil }
+    var headers: [String: String]? {
+        return [
+             "Authorization": "Bearer \(AppConfig.tmdbBearerToken)",
+             "accept": "application/json"
+         ]
+    }
 
     var queryItems: [URLQueryItem]? {
         switch self {

@@ -22,7 +22,10 @@ extension MovieEndpoint: Endpoint {
     }
     
     var headers: [String : String]? {
-        nil
+        return [
+             "Authorization": "Bearer \(AppConfig.tmdbBearerToken)",
+             "accept": "application/json"
+         ]
     }
     
     var queryItems: [URLQueryItem]? {

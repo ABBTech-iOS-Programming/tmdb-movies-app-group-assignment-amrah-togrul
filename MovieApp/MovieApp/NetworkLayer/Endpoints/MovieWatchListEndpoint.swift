@@ -37,7 +37,10 @@ extension MovieWatchListEndpoint: Endpoint {
     }
     
     var headers: [String: String]? {
-        ["Content-Type": "application/json"]
+        return [
+             "Authorization": "Bearer \(AppConfig.tmdbBearerToken)",
+             "accept": "application/json"
+         ]
     }
 
     var queryItems: [URLQueryItem]? { nil }
