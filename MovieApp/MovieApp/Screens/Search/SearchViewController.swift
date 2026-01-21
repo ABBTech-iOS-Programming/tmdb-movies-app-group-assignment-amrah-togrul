@@ -228,7 +228,7 @@ extension SearchViewController: UICollectionViewDataSource {
 
 extension SearchViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let movieId = viewModel.searchedMovies[indexPath.item].id
+        let movieId = viewModel.searchedMovies[indexPath.row].id
         let vc = MovieDetailViewController(movieId: movieId)
         navigationController?.pushViewController(vc, animated: true)
     }
